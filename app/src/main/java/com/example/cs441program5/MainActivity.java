@@ -2,6 +2,7 @@ package com.example.cs441program5;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -10,20 +11,28 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
+    private float background1y;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ImageView background1 = findViewById(R.id.imageView);
+        ImageView background2 = findViewById(R.id.imageView2);
+        ImageView background3 = findViewById(R.id.imageView3);
+
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        TextView text = findViewById(R.id.text);
+        ImageView text = findViewById(R.id.car);
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -31,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
         SensorEventListener accelerometerListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                if(text.getX() >= 50 && (-sensorEvent.values[0] < 0)){
+                if(text.getX() >= 115 && (-sensorEvent.values[0] < 0)){
                     text.setX(text.getX() + (-sensorEvent.values[0] * 5));
-                } else if(text.getX() <= 850 && (-sensorEvent.values[0] > 0)){
+                } else if(text.getX() <= 690 && (-sensorEvent.values[0] > 0)){
                     text.setX(text.getX() + (-sensorEvent.values[0] * 5));
                 }
             }
@@ -44,5 +53,23 @@ public class MainActivity extends AppCompatActivity {
         };
 
         sensorManager.registerListener(accelerometerListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        final ValueAnimator animator = ValueAnimator.ofFloat(0.0f, 1.0f);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setInterpolator(new LinearInterpolator());
+        animator.setDuration(5000L);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                final float progress = (float) animation.getAnimatedValue();
+                final float height = background1.getHeight();
+                final float translationY = height * progress;
+                background1.setTranslationY(translationY);
+                background2.setTranslationY(translationY - height/2);
+                background3.setTranslationY(translationY - height);
+
+            }
+        });
+        animator.start();
+
     }
 }
